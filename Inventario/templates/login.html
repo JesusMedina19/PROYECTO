@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://kit.fontawesome.com/9f9ff72602.js" crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'Inventario/login.css' %}">
+    <title>Iniciar sesión</title>
+</head>
+<body>
+    <div class="wrapper">
+        <h2>Inicio de sesión</h2>
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="input-field">
+                <i class="fa-regular fa-envelope"></i>
+                <input type="text" name="username" placeholder="username" required>  <!-- Cambiado de 'user' a 'username' -->
+            </div>
+            <div class="input-field">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" name="password" placeholder="password" required>
+            </div>
+
+            <button type="submit" class="login">Iniciar sesión</button>
+        </form>
+        
+        {% if error %}
+            <p id="message">{{ error }}</p>
+        {% endif %}
+        
+        <p>¿No tienes una cuenta? <a href="{% url 'register' %}">Regístrate aquí</a></p> <!-- Enlace a la página de registro -->
+    </div>
+</body>
+</html>
