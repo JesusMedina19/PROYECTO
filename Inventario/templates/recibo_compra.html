@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recibo de Compra</title>
+    <link rel="stylesheet" href="{% static 'Inventario/recibo_compra.css' %}">
+</head>
+<body>
+    <div class="factura">
+        <header class="encabezado">
+            <!-- Logo más grande y centrado -->
+            <div class="logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo Glam Femenina">
+            </div>
+
+            <!-- Título y detalles -->
+            <div class="titulo">
+                <h1>GLAM FEMENINA</h1>
+                <p>NÚMERO DE FACTURA {{ factura.numero }} | {{ fecha_venta }}</p>
+                <p>{{ direccion }}</p>
+                <p>WhatsApp: <a href="tel:+573232123845" style="color: #FF69B4; text-decoration: none;">323 2123845</a></p>
+            </div>
+        </header>
+
+        <!-- Información del cliente -->
+        <section id="seccion-cliente">
+            <div id="formulario-cliente" class="formulario-contenedor">
+                <h2>Cliente:</h2>
+                <form id="cliente-form" class="formulario" method="POST">
+                    {% csrf_token %}
+                    <div class="form-grupo">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" id="nombre" name="nombre" placeholder="Nombre del cliente" required>
+                    </div>
+                    <div class="form-grupo">
+                        <label for="correo">Correo</label>
+                        <input type="email" id="correo" name="correo" placeholder="Correo electrónico" required>
+                    </div>
+                    <div class="form-grupo">
+                        <label for="telefono">Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" placeholder="Teléfono" required>
+                    </div>
+                    <div class="form-grupo">
+                        <label for="direccion">Dirección</label>
+                        <input type="text" id="direccion" name="direccion" placeholder="Dirección" required>
+                    </div>
+                    <button type="submit" class="btn-guardar">Guardar Cliente</button>
+                </form>
+            </div>
+
+            <!-- Mostrar información del cliente -->
+            {% if cliente %}
+            <div id="info-cliente" class="info-cliente">
+                <h2>Cliente:</h2>
+                <p><strong>Nombre:</strong> {{ cliente.nombre }}</p>
+                <p><strong>Correo:</strong> {{ cliente.correo }}</p>
+                <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Tabla de productos -->
+        <section class="tabla">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in carrito %}
+                    <tr>
+                        <td>{{ producto.descripcion }}</td>
+                        <td>{{ producto.cantidad }}</td>
+                        <td>${{ producto.precio }}</td>
+                        <td>${{ producto.precio|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="totales">
+                <p>Subtotal: ${{ subtotal }}</p>
+                <p class="total" style="color: white;">TOTAL: ${{ total }}</p>
+            </div>
+        </section>
+
+        <!-- Detalle del pago -->
+        <section id="detalle-pago" style="display: none; margin-top: 20px;">
+            <h3>Detalle del Pago:</h3>
+            <p>{{ metodo_pago }}</p>
+        </section>
+
+        <!-- Botón de acciones -->
+        <div class="acciones">
+            <button id="btn-imprimir" class="btn-imprimir">Imprimir Recibo</button>
+        </div>
+    </div>
+
+    <script src="{% static 'Inventario/recibo_compra.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</body>
+</html>

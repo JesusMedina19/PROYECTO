@@ -1,0 +1,297 @@
+/* Estilos básicos de la página */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fdeef4;  /* Fondo rosado suave */
+    color: #333;  /* Texto negro */
+}
+
+/* Contenedor principal de la factura */
+.factura {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    color: #000;  /* Texto negro */
+}
+
+/* Encabezado de la factura */
+.encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    border-bottom: 2px solid #e78aa8;  /* Borde rosado intermedio */
+    background-color: #fff;
+}
+
+.logo img {
+    width: 80px;
+    height: auto;
+    margin-right: 15px;
+}
+
+.titulo {
+    flex: 1;
+    text-align: center;
+    color: #000;  /* Texto negro */
+}
+
+.encabezado h1 {
+    font-size: 2.2rem;
+    margin: 0;
+    color: #000;  /* Texto negro */
+    font-weight: bold;
+}
+
+.encabezado p {
+    color: #000;  /* Texto negro */
+    font-weight: bold;
+}
+
+/* Estilo para el banner */
+.banner {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 20px;
+    padding: 15px;
+    background-color: #f6c1d3;  /* Fondo rosado moderado */
+    border-radius: 10px;
+    max-width: 250px;
+    color: #000;  /* Texto negro */
+}
+
+.banner h2 {
+    font-size: 1.4rem;
+    text-align: left;
+    margin: 0;
+    color: #000;  /* Texto negro */
+}
+
+.banner p {
+    font-size: 1rem;
+    margin-top: 5px;
+    text-align: left;
+    color: #000;  /* Texto negro */
+}
+
+/* Sección del cliente */
+#seccion-cliente {
+    margin-top: 20px;
+}
+
+/* Estilo del formulario de cliente */
+.formulario-contenedor {
+    padding: 20px;
+    border-radius: 8px;
+    background: none;
+    box-shadow: none;
+}
+
+.formulario label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+    color: #000;  /* Texto negro */
+}
+
+.formulario input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e78aa8;  /* Borde rosado */
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    color: #000;  /* Texto negro */
+    transition: border-color 0.3s ease;
+}
+
+.formulario input:focus {
+    border-color: #e84b84;  /* Rosado vibrante al enfocar */
+    outline: none;
+}
+
+/* Botón de guardar cliente */
+.btn-guardar {
+    background-color: #e84b84;  /* Rosado vibrante */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-guardar:hover {
+    background-color: #d14076;  /* Rosado más oscuro */
+    transform: translateY(-2px);
+}
+
+.btn-guardar:active {
+    background-color: #b63464;  /* Rosado intenso */
+    transform: translateY(0);
+}
+
+/* Información del cliente */
+.info-cliente {
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: none;
+    background: none;
+    color: #000;  /* Texto negro */
+}
+
+.info-cliente h2 {
+    color: #000;  /* Texto negro */
+}
+
+/* Tabla de servicios */
+.tabla table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    margin-top: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    color: #000;  /* Texto negro */
+}
+
+.tabla th, .tabla td {
+    padding: 12px 15px;
+    text-align: center;
+    font-size: 1rem;
+    border: 1px solid #f5c6cb;  /* Bordes rosados claros */
+    border-radius: 8px;
+    background: #fdeef4;  /* Fondo rosado suave */
+    color: #000;  /* Texto negro */
+}
+
+.tabla th {
+    background-color: #e84b84;  /* Rosado vibrante */
+    color: #fff;  /* Texto blanco */
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.tabla tr:hover {
+    background-color: #f6c1d3;  /* Rosado moderado */
+    cursor: pointer;
+}
+
+.tabla td, .tabla th {
+    border: 1px solid #e78aa8;
+}
+
+.tabla .totales p {
+    text-align: right;
+    font-size: 1.2rem;
+    margin: 10px 0;
+    font-weight: bold;
+    color: #000;  /* Texto negro */
+}
+
+.tabla .total {
+    background-color: #e84b84;  /* Rosado vibrante */
+    padding: 10px;
+    border-radius: 8px;
+    display: inline-block;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;  /* Texto blanco */
+}
+
+/* Botones de acciones */
+.acciones {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn-imprimir {
+    background-color: #e84b84;  /* Rosado vibrante */
+    color: #fff;
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.btn-imprimir:hover {
+    background-color: #d14076;  /* Rosado más oscuro */
+    transform: translateY(-3px);
+}
+
+.btn-imprimir:active {
+    background-color: #b63464;  /* Rosado intenso */
+    transform: translateY(0);
+}
+@media print {
+    /* Cambiar todo el texto a negro para la impresión */
+    body, .factura, .encabezado, .banner, .titulo, .tabla, .totales, .acciones, p, h1, h2, h3 {
+        color: black !important;
+    }
+
+    /* Asegúrate de que los enlaces en el WhatsApp también sean visibles y legibles */
+    a {
+        color: black !important;
+    }
+}
+/* Definir el color rosado para la pantalla */
+.rosado {
+    color: #f28ab2 !important; /* Un rosado no tan claro ni tan oscuro */
+}
+
+/* Estilo para impresión: hacer que el texto sea negro al imprimir */
+@media print {
+    .rosado {
+        color: #333 !important; /* Negro para impresión */
+    }
+}
+
+ /* Estilo para el logo */
+ .logo img {
+    width: 150px; /* Ajusta el tamaño del logo */
+    height: auto;
+    display: block;
+    margin: 0 auto; /* Centra el logo */
+}
+
+/* Estilo para el título y la información debajo */
+.encabezado {
+    text-align: center;
+    margin-top: 10px; /* Espaciado ajustado entre el logo y el texto */
+}
+
+.titulo {
+    color: #FF69B4; /* Ejemplo de color rosado */
+    font-size: 22px;
+    margin: 5px 0; /* Espaciado reducido */
+}
+
+.informacion {
+    color: #FF69B4; /* Mismo color que el título */
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Para impresión */
+@media print {
+    #btn-imprimir {
+        display: none;
+    }
+    body, .factura, .factura * {
+        color: black !important;
+        -webkit-print-color-adjust: exact;
+    }
+}
+

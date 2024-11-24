@@ -1,0 +1,206 @@
+
+    
+/* Configuración básica */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #ffffff; /* MistyRose - rosado pálido para el fondo */
+}
+
+.card-actions button {
+    width: 100px;
+    margin: 2px;
+}
+
+/* Estilo del menú lateral */
+.sidebar {
+    background-color: #FFE4E1; /* MistyRose - rosado muy claro */
+    color: #DB7093; /* PaleVioletRed - rosado oscuro */
+    width: 250px;
+    height: 100vh;
+    padding-top: 30px;
+    position: fixed;
+    left: 0;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h2 {
+    color: #DB7093; /* PaleVioletRed */
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 30px;
+}
+
+.sidebar .nav-item {
+    margin-bottom: 15px;
+}
+
+.sidebar .nav-item a {
+    color: #DB7093; /* PaleVioletRed */
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border-radius: 10px;
+}
+
+.sidebar .nav-item a:hover {
+    background-color: #FFC0CB; /* Pink - rosado medio */
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.sidebar .nav-item a.active {
+    background-color: #FFB6C1; /* LightPink - rosado medio */
+    color: #fff;
+}
+
+.sidebar .nav-item a .fas {
+    margin-right: 15px;
+    font-size: 1.3rem;
+}
+
+/* Estilo del contenido principal */
+.content {
+    margin-left: 250px;
+    padding: 30px;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 30px;
+    background-color: #ffffff; /* MistyRose - mismo color que el fondo */
+}
+
+/* Títulos */
+.content h1, .content h2 {
+    color: #C71585; /* MediumVioletRed - rosado oscuro */
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+}
+
+/* Centrado de las tarjetas */
+.row {
+    justify-content: center;
+}
+
+.col-md-4 {
+    display: flex;
+    justify-content: center;
+}
+
+/* Estilo de las tarjetas */
+.card {
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgb(226, 131, 159);
+    margin: 15px;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    width: auto;
+    max-width: 100%;
+    flex-grow: 1;
+    background-color: #ffffff; /* Blanco puro */
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #DB7093; /* PaleVioletRed */
+}
+
+.card-body {
+    font-size: 1.1rem;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.card-text {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #FF69B4; /* HotPink - rosado brillante */
+}
+
+/* Estilo de la tabla */
+.table {
+    border-radius: 15px;
+    border: 1px solid #FFB6C1; /* LightPink */
+    overflow: hidden;
+    background-color: #ffffff; /* Blanco para el fondo de la tabla */
+}
+
+.table th, .table td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 12px;
+}
+
+.table th {
+    background-color: #FFB6C1; /* LightPink - rosado claro */
+    color: #ffffff; /* Texto blanco en el encabezado */
+    font-weight: bold;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #ffffff; /* Filas blancas */
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #ffffff; /* Filas rosado muy pálido */
+}
+
+.table-responsive {
+    margin-top: 20px;
+    overflow-x: auto;
+    width: 100%;
+}
+
+.table td, .table th {
+    border-top: 1px solid #FFB6C1; /* LightPink */
+}
+
+/* Mejoras responsivas */
+@media (max-width: 768px) {
+    .content {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-4 {
+        margin-bottom: 20px;
+    }
+
+    .card {
+        max-width: 100%;
+    }
+}
+
+/* Botones */
+.btn-rosado-nude {
+    background-color: #FFB6C1; /* LightPink */
+    color: white;
+}
+
+.btn-rosado-nude:hover {
+    background-color: #FF69B4; /* HotPink */
+    color: white;
+}
+
+/* Cambiar la fuente del cuerpo a Lora */
+body {
+    font-family: 'Lore', serif;
+  }
+  
+  h1, h2, h3 {
+    font-family: 'Agbalumo', serif;
+  }

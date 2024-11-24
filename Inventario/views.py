@@ -1,9 +1,11 @@
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse,JsonResponse
+from uuid import uuid4
 from django.contrib import messages
 from django.contrib.auth import login
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CustomUserCreationForm, ProductoForm
-from Inventario.models import Usuario, Categoria, Producto
+from Inventario.models import Usuario, Categoria, Producto,Cliente
+from datetime import datetime  
 
 
 # Vista para ingresar a la aplicación (inicio de sesión)
@@ -22,7 +24,7 @@ def login_view(request):
                 user = Usuario.objects.get(usuario=username)  # Busca el usuario en la base de datos
                 if user.check_password(password):  # Verifica si la contraseña es correcta
                     login(request, user)  # Inicia sesión al usuario
-                    return redirect('categorias')  # Redirige a la vista de categorías
+                    return redirect('menu')  # Redirige a la vista de categorías
                 else:
                     messages.error(request, 'Datos incorrectos. Intenta nuevamente.')  # Error de contraseña
             except Usuario.DoesNotExist:
@@ -110,19 +112,18 @@ def eliminar_categoria(request, id_categoria):
 def agregar_producto(request):
     """
     Vista para agregar un nuevo producto. Si se recibe un formulario válido, se guarda el producto
-    y se redirige a la lista de categorías. Si el formulario no es válido, se muestran los errores.
+    y se redirige al menú. Si el formulario no es válido, se muestran los errores.
     """
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES)  # Obtiene los datos del formulario y archivos
         if form.is_valid():  # Si el formulario es válido
             form.save()  # Guarda el nuevo producto
-            return redirect('categorias')  # Redirige a la vista de categorías
+            return redirect('menu')  # Redirige al menú
     else:
         form = ProductoForm()  # Si no es un POST, crea un formulario vacío
 
-    return render(request, 'categorias.html', {'form': form})  # Renderiza la plantilla con el formulario
-
-
+    categorias = Categoria.objects.all()  # Obtiene todas las categorías de la base de datos
+    return render(request, 'menu.html', {'form': form, 'categorias': categorias})
 # Vista para editar un producto
 def editar_producto(request, id_producto):
     """
@@ -163,3 +164,111 @@ def ver_productos(request, id_categoria):
     categoria = get_object_or_404(Categoria, id_categoria=id_categoria)  # Obtiene la categoría por ID
     productos = categoria.productos.all()  # Obtiene todos los productos de esa categoría
     return render(request, 'productos.html', {'categoria': categoria, 'productos': productos})  # Renderiza la plantilla con los productos
+
+#Vista agregar al carrito
+def agregar_al_carrito(request, nombre, precio):
+    # Verificar si existe la clave 'carrito' en la sesión
+    if 'carrito' not in request.session:
+        request.session['carrito'] = []  # Crear carrito si no existe
+
+    # Trabajar con el carrito de la sesión directamente
+    carrito = request.session['carrito']
+
+    # Convertir el precio a float y manejar errores
+    try:
+        precio = float(precio)
+    except ValueError:
+        return JsonResponse({"success": False, "message": "Precio inválido"})
+
+    # Buscar el producto en el carrito por su nombre y precio
+    producto_existente = None
+    for producto in carrito:
+        if producto['nombre'] == nombre and producto['precio'] == precio:
+            producto_existente = producto
+            break  # Romper el bucle una vez que encontramos el producto
+
+    if producto_existente:
+        # Si el producto ya existe, incrementar la cantidad y actualizar el subtotal
+        producto_existente['cantidad'] += 1
+        producto_existente['subtotal'] = producto_existente['cantidad'] * producto_existente['precio']
+    else:
+        # Si no existe, agregarlo como un nuevo producto con cantidad 1
+        producto_id = str(uuid4())  # Generar un ID único
+        nuevo_producto = {
+            'id': producto_id,
+            'nombre': nombre,
+            'precio': precio,
+            'cantidad': 1,
+            'subtotal': precio
+        }
+        carrito.append(nuevo_producto)
+
+    # Actualizar el carrito en la sesión
+    request.session['carrito'] = carrito
+    request.session.modified = True  # Marcar la sesión como modificada
+
+    return JsonResponse({
+        "success": True,
+        "message": "Producto agregado al carrito",
+        "carrito": carrito
+    })
+
+#Mostrar carrito
+def mostrar_carrito(request):
+    # Obtiene el carrito de la sesión
+    carrito = request.session.get('carrito', [])
+    
+    # Calcula el total sumando el precio de todos los productos en el carrito
+    total = sum(item['precio'] for item in carrito)
+
+    # Devuelve el carrito y el total en formato JSON
+    return JsonResponse({
+        'carrito': carrito,
+        'total': total
+    })
+    
+    
+def menu_view(request):
+    return render(request, "menu.html")
+
+def recibo_compra(request):
+    # Obtener el carrito desde la sesión
+    carrito = request.session.get('carrito', [])
+
+    # Validar que el carrito no esté vacío
+    if not carrito:
+        carrito = []
+
+    # Procesar el formulario de cliente
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        correo = request.POST.get('correo')
+        telefono = request.POST.get('telefono')
+        direccion = request.POST.get('direccion')  # Capturar la dirección
+
+        # Guardar la información del cliente en la base de datos
+        cliente = Cliente.objects.create(
+            nombre=nombre,
+            correo=correo,
+            telefono=telefono,
+            direccion=direccion
+        )
+
+        # Renderizar el recibo con los datos del cliente
+        subtotal = sum(item['precio'] * item['cantidad'] for item in carrito)
+        return render(request, 'recibo_compra.html', {
+            'carrito': carrito,
+            'subtotal': subtotal,
+            'total': subtotal,
+            'fecha_venta': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'cliente': cliente,  # Pasar el cliente a la plantilla
+        })
+
+    # Renderizar la página sin procesar el formulario
+    subtotal = sum(item['precio'] * item['cantidad'] for item in carrito)
+    return render(request, 'recibo_compra.html', {
+        'carrito': carrito,
+        'subtotal': subtotal,
+        'total': subtotal,
+        'fecha_venta': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+    })

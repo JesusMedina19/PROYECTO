@@ -1,0 +1,172 @@
+/* Importar la fuente */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+/* Fuente global */
+body {
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fffafc; /* Fondo suave */
+    display: flex;
+    height: 100vh;
+}
+
+/* Menú lateral */
+.sidebar {
+    width: 250px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+}
+
+/* Contenido principal */
+.content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Botón rosado nude */
+.btn-rosado-nude {
+    background-color: #e8a7c6;
+    color: black;
+    border: none;
+}
+
+.btn-rosado-nude:hover {
+    background-color: #d598b5;
+    color: white;
+}
+
+/* Efectos en tarjetas */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #f3c6d8;
+    border-radius: 15px;
+    background-color: #fff5fa;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Imagen de producto */
+.card img {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+}
+
+.card img:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+/* Botones */
+.card .btn {
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 14px;
+    padding: 10px 20px;
+    border-radius: 20px;
+    transition: background-color 0.3s, color 0.3s;
+    font-weight: bold;
+}
+
+.card .btn-warning {
+    background-color: #f8a5c2;
+    border: none;
+    color: #fff;
+}
+
+.card .btn-warning:hover {
+    background-color: #f48fb1;
+}
+
+.card .btn-danger {
+    background-color: #f67280;
+    border: none;
+    color: #fff;
+}
+
+.card .btn-danger:hover {
+    background-color: #e74c3c;
+}
+
+/* Centrado del mensaje de "Agregado" */
+.agregado-mensaje {
+    font-family: 'Poppins', system-ui, sans-serif;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background: rgba(240, 128, 128, 0.9);
+    color: #fff;
+    padding: 20px 30px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Contenedor principal */
+#productosLista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* Título de categoría */
+h1 {
+    font-family: 'Poppins', system-ui, sans-serif;
+    color: #c0392b;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-bottom: 3px solid #f8a5c2;
+    display: inline-block;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+    font-size: 36px;
+}
+
+/* Estilo para los nombres de los productos */
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Descripción y precio del producto */
+.card-text {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Transición en elementos seleccionables */
+.producto-seleccionable {
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.producto-seleccionable:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card img {
+        max-height: 150px;
+    }
+
+    .card .btn {
+        font-size: 12px;
+        padding: 8px 15px;
+    }
+}
