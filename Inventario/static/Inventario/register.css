@@ -1,0 +1,125 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #f5f5f5;
+}
+
+.wrapper {
+    background: white;
+    padding: 30px 40px;
+    width: 420px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.wrapper h2 {
+    font-size: 24px;
+    margin-bottom: 25px;
+    color: #333;
+    text-align: center;
+}
+
+.input-field {
+    position: relative;
+    height: 50px;
+    margin: 15px 0;
+}
+
+.input-field input {
+    width: 100%;
+    height: 100%;
+    padding: 0 35px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    border-bottom: 2px solid #ccc;
+    transition: all 0.2s ease;
+}
+
+.input-field input:focus {
+    border-bottom-color: #FF69B4;
+}
+
+.input-field i {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 10px;
+    color: #999;
+    transition: all 0.2s ease;
+}
+
+.btn-register {
+    width: 100%;
+    height: 45px;
+    margin: 25px 0 15px;
+    background: #FF69B4;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-register:hover {
+    background: #FF1493;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 15px;
+    color: #666;
+}
+
+.login-link a {
+    color: #FF69B4;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+    color: #ff4444;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.messages {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}

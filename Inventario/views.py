@@ -1,12 +1,21 @@
 from django.http import HttpResponse,JsonResponse
-from uuid import uuid4
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CustomUserCreationForm, ProductoForm
-from Inventario.models import Usuario, Categoria, Producto,Cliente
 from datetime import datetime  
+from Inventario.models import (
+    Usuario,
+    Categoria,
+    Producto,)
+from django.views.decorators.csrf import ensure_csrf_cookie
+import json
+import logging
 
+logger = logging.getLogger(__name__)
 
 # Vista para ingresar a la aplicación (inicio de sesión)
 def login_view(request):
@@ -24,7 +33,7 @@ def login_view(request):
                 user = Usuario.objects.get(usuario=username)  # Busca el usuario en la base de datos
                 if user.check_password(password):  # Verifica si la contraseña es correcta
                     login(request, user)  # Inicia sesión al usuario
-                    return redirect('menu')  # Redirige a la vista de categorías
+                    return redirect('categorias')  # Redirige a la vista de categorías
                 else:
                     messages.error(request, 'Datos incorrectos. Intenta nuevamente.')  # Error de contraseña
             except Usuario.DoesNotExist:
@@ -34,26 +43,27 @@ def login_view(request):
     
     return render(request, 'login.html')  # Renderiza la plantilla de inicio de sesión
 
-
 # Vista para registrar un nuevo usuario
 def register_view(request):
-    """
-    Vista para registrar un nuevo usuario. Si se envían datos válidos, se guarda el nuevo usuario
-    y se redirige al inicio de sesión. Si hay errores en el formulario, se muestran mensajes de error.
-    """
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)  # Obtiene los datos del formulario
-        if form.is_valid():  # Si el formulario es válido
-            form.save()  # Guarda el nuevo usuario
-            messages.success(request, 'Cuenta creada con éxito')  # Mensaje de éxito
-            return redirect('login')  # Redirige a la página de inicio de sesión
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            try:
+                user = form.save()
+                # Autenticar y hacer login automáticamente después del registro
+                login(request, user)
+                messages.success(request, 'Cuenta creada exitosamente')
+                return redirect('login')  
+            except Exception as e:
+                messages.error(request, f'Error al crear la cuenta: {str(e)}')
         else:
-            messages.error(request, 'Error al crear la cuenta. Por favor, verifica los errores.')  # Error de validación
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
-        form = CustomUserCreationForm()  # Si no es POST, crea un formulario vacío
-
-    return render(request, 'register.html', {'form': form})  # Renderiza la plantilla de registro
-
+        form = CustomUserCreationForm()
+    
+    return render(request, 'register.html', {'form': form})
 
 # Vista para mostrar categorías
 def categorias_view(request):
@@ -110,37 +120,65 @@ def eliminar_categoria(request, id_categoria):
 
 # Vista para agregar un nuevo producto
 def agregar_producto(request):
-    """
-    Vista para agregar un nuevo producto. Si se recibe un formulario válido, se guarda el producto
-    y se redirige al menú. Si el formulario no es válido, se muestran los errores.
-    """
     if request.method == 'POST':
-        form = ProductoForm(request.POST, request.FILES)  # Obtiene los datos del formulario y archivos
-        if form.is_valid():  # Si el formulario es válido
-            form.save()  # Guarda el nuevo producto
-            return redirect('menu')  # Redirige al menú
+        form = ProductoForm(request.POST, request.FILES)
+        if form.is_valid():
+            producto = form.save(commit=False)
+            producto.disponible = True if producto.stock > 0 else False
+            producto.save()
+            return redirect('categorias')  # Changed from 'menu'
+        else:
+            print(form.errors)  # Para debug
     else:
-        form = ProductoForm()  # Si no es un POST, crea un formulario vacío
+        form = ProductoForm()
 
-    categorias = Categoria.objects.all()  # Obtiene todas las categorías de la base de datos
-    return render(request, 'menu.html', {'form': form, 'categorias': categorias})
+    categorias = Categoria.objects.all()
+    return render(request, 'categorias.html', {'form': form, 'categorias': categorias})
+
 # Vista para editar un producto
 def editar_producto(request, id_producto):
-    """
-    Vista para editar un producto existente. Se obtiene el producto por su ID y, si se envían datos
-    válidos, se guardan los cambios. Luego, se redirige a la lista de productos de la categoría correspondiente.
-    """
-    producto = get_object_or_404(Producto, id_producto=id_producto)  # Obtiene el producto por ID
+    producto = get_object_or_404(Producto, id_producto=id_producto)
+    categoria_original = producto.categoria
 
     if request.method == 'POST':
-        form = ProductoForm(request.POST, request.FILES, instance=producto)  # Prellena el formulario con los datos del producto
-        if form.is_valid():  # Si el formulario es válido
-            form.save()  # Guarda los cambios
-            return redirect('productos', id_categoria=producto.categoria.id_categoria)  # Redirige a los productos de la categoría
-    else:
-        form = ProductoForm(instance=producto)  # Si no es POST, crea un formulario con los datos del producto
+        form = ProductoForm(request.POST, request.FILES, instance=producto)
+        if form.is_valid():
+            nuevo_producto = form.save(commit=False)
+            nuevo_producto.categoria = categoria_original
+            nuevo_producto.disponible = nuevo_producto.stock > 0
+            nuevo_producto.save()
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'success',
+                    'producto': {
+                        'nombre': nuevo_producto.nombre,
+                        'precio': float(nuevo_producto.precio),
+                        'stock': nuevo_producto.stock,
+                        'disponible': nuevo_producto.disponible,
+                        'descripcion': nuevo_producto.descripcion,
+                        'id_producto': nuevo_producto.id_producto
+                    },
+                    'message': 'Producto actualizado correctamente'
+                })
+        else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # Devolver errores más descriptivos
+                errors = {field: str(error[0]) for field, error in form.errors.items()}
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Error en el formulario',
+                    'errors': errors
+                }, status=400)
 
-    return render(request, 'productos.html', {'form': form, 'producto': producto})  # Renderiza la plantilla con el formulario y el producto
+    # Para peticiones GET o formularios inválidos
+    productos = categoria_original.productos.all()
+    return render(request, 'productos.html', {
+        'form': form,
+        'producto': producto,
+        'categoria': categoria_original,
+        'productos': productos
+    })
 
 
 # Vista para eliminar un producto
@@ -166,53 +204,104 @@ def ver_productos(request, id_categoria):
     return render(request, 'productos.html', {'categoria': categoria, 'productos': productos})  # Renderiza la plantilla con los productos
 
 #Vista agregar al carrito
-def agregar_al_carrito(request, nombre, precio):
-    # Verificar si existe la clave 'carrito' en la sesión
-    if 'carrito' not in request.session:
-        request.session['carrito'] = []  # Crear carrito si no existe
+def agregar_al_carrito(request, producto_id):
+    producto = Producto.objects.get(id=producto_id)
+    carrito = request.session.get('carrito', [])
 
-    # Trabajar con el carrito de la sesión directamente
-    carrito = request.session['carrito']
+    # Convertir el precio a float
+    precio = float(producto.precio)
 
-    # Convertir el precio a float y manejar errores
-    try:
-        precio = float(precio)
-    except ValueError:
-        return JsonResponse({"success": False, "message": "Precio inválido"})
-
-    # Buscar el producto en el carrito por su nombre y precio
-    producto_existente = None
-    for producto in carrito:
-        if producto['nombre'] == nombre and producto['precio'] == precio:
-            producto_existente = producto
-            break  # Romper el bucle una vez que encontramos el producto
-
-    if producto_existente:
-        # Si el producto ya existe, incrementar la cantidad y actualizar el subtotal
-        producto_existente['cantidad'] += 1
-        producto_existente['subtotal'] = producto_existente['cantidad'] * producto_existente['precio']
+    for item in carrito:
+        if item['id'] == producto.id:
+            item['cantidad'] += 1
+            break
     else:
-        # Si no existe, agregarlo como un nuevo producto con cantidad 1
-        producto_id = str(uuid4())  # Generar un ID único
-        nuevo_producto = {
-            'id': producto_id,
-            'nombre': nombre,
-            'precio': precio,
+        carrito.append({
+            'id': producto.id,
+            'nombre': producto.nombre,
+            'precio': precio,  # Asegurarse de que sea un número
             'cantidad': 1,
-            'subtotal': precio
-        }
-        carrito.append(nuevo_producto)
+        })
 
-    # Actualizar el carrito en la sesión
     request.session['carrito'] = carrito
-    request.session.modified = True  # Marcar la sesión como modificada
+    return redirect('recibo_compra')
 
+@ensure_csrf_cookie
+def actualizar_carrito(request):
+    logger.info("=== INICIANDO ACTUALIZAR_CARRITO ===")
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            carrito = data.get('carrito', [])
+            
+            if not carrito:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Carrito vacío'
+                })
+            
+            # Procesar el carrito
+            for item in carrito:
+                precio_str = str(item['precio']).strip().replace(',', '.')
+                item['precio'] = round(float(precio_str), 2)
+                item['cantidad'] = int(item['cantidad'])
+                item['total'] = round(item['precio'] * item['cantidad'], 2)
+            
+            request.session['carrito'] = carrito
+            request.session.modified = True
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Carrito actualizado correctamente'
+            })
+            
+        except Exception as e:
+            logger.error("Error en actualizar_carrito: %s", str(e))
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
+    
     return JsonResponse({
-        "success": True,
-        "message": "Producto agregado al carrito",
-        "carrito": carrito
+        'status': 'error',
+        'message': 'Método no permitido'
     })
+'''
+def recibo_compra(request):
+    logger.info("=== Iniciando vista recibo_compra ===")
+    carrito = request.session.get('carrito', [])
+    cliente_data = request.session.get('cliente_data', {})
+    
+    if not carrito:
+        messages.error(request, 'No hay productos en el carrito')
+        return redirect('producto')  # Changed from 'menu'
 
+    try:
+        # Procesar carrito
+        for item in carrito:
+            precio = float(str(item['precio']).replace(',', '.'))
+            cantidad = int(item['cantidad'])
+            item['total'] = precio * cantidad
+        
+        subtotal = sum(item['total'] for item in carrito)
+        total = subtotal
+
+        context = {
+            'carrito': carrito,
+            'subtotal': round(subtotal, 2),
+            'total': round(total, 2),
+            'fecha_venta': datetime.now(),
+            #'factura': { datetime.now().strftime('%Y%m%d%H%M%S')},
+            'cliente': cliente_data  # Usar los datos del cliente
+        }
+        
+        return render(request, 'recibo_compra.html', context)
+    
+    except Exception as e:
+        logger.error("Error en recibo_compra: %s", str(e))
+        messages.error(request, f'Error al generar el recibo: {str(e)}')
+        return redirect('recibo_compra')  # Changed from 'menu'
+'''
 #Mostrar carrito
 def mostrar_carrito(request):
     # Obtiene el carrito de la sesión
@@ -227,48 +316,65 @@ def mostrar_carrito(request):
         'total': total
     })
     
+
     
-def menu_view(request):
-    return render(request, "menu.html")
-
+    
 def recibo_compra(request):
-    # Obtener el carrito desde la sesión
+    logger.info("=== Iniciando vista recibo_compra ===")
+    
     carrito = request.session.get('carrito', [])
+    metodo_pago = request.session.get('metodo_pago', 'No especificado')  # Recupera el método de pago
+    nombre_cliente = request.session.get('nombre_cliente', 'Nombre no proporcionado')
+    correo_cliente = request.session.get('correo_cliente', 'Correo no proporcionado')
+    telefono_cliente = request.session.get('telefono_cliente', 'Teléfono no proporcionado')
+    direccion_cliente = request.session.get('direccion_cliente', 'Dirección no proporcionada')
 
-    # Validar que el carrito no esté vacío
+    # Recuperar el descuento desde la sesión o establecerlo a 0 si no está presente
+    descuento = request.session.get('descuento', 0)
+    
+    logger.info("Carrito recuperado de sesión: %s", carrito)
+
     if not carrito:
-        carrito = []
+        logger.warning("No hay productos en el carrito")
+        messages.error(request, 'No hay productos en el carrito')
+        return redirect('categorias')
 
-    # Procesar el formulario de cliente
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        correo = request.POST.get('correo')
-        telefono = request.POST.get('telefono')
-        direccion = request.POST.get('direccion')  # Capturar la dirección
+    try:
+        # Procesando los items del carrito
+        for item in carrito:
+            if 'total' not in item:
+                precio = float(str(item['precio']).replace(',', '.'))
+                cantidad = int(item['cantidad'])
+                item['total'] = precio * cantidad
+        
+        subtotal = sum(item['total'] for item in carrito)
+        
+        # Aplicar el descuento al subtotal
+        descuento_monto = subtotal * (descuento / 100)
+        total = subtotal - descuento_monto
 
-        # Guardar la información del cliente en la base de datos
-        cliente = Cliente.objects.create(
-            nombre=nombre,
-            correo=correo,
-            telefono=telefono,
-            direccion=direccion
-        )
-
-        # Renderizar el recibo con los datos del cliente
-        subtotal = sum(item['precio'] * item['cantidad'] for item in carrito)
-        return render(request, 'recibo_compra.html', {
+        # Contexto con los datos del cliente y el carrito
+        context = {
             'carrito': carrito,
-            'subtotal': subtotal,
-            'total': subtotal,
-            'fecha_venta': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'cliente': cliente,  # Pasar el cliente a la plantilla
-        })
+            'subtotal': round(subtotal, 2),
+            'descuento': round(descuento_monto, 2),
+            'total': round(total, 2),
+            'fecha_venta': datetime.now(),
+            'factura': datetime.now().strftime('%Y%m%d%H%M%S'),
+            'direccion': 'Cra 4 #70-22 Conjunto Vaparaiso Local 44',
+            'cliente': {
+                'nombre': nombre_cliente,
+                'correo': correo_cliente,
+                'telefono': telefono_cliente,
+                'direccion': direccion_cliente,
+            },
+            'metodo_pago': metodo_pago,  # Agregar el método de pago al contexto
+        }
 
-    # Renderizar la página sin procesar el formulario
-    subtotal = sum(item['precio'] * item['cantidad'] for item in carrito)
-    return render(request, 'recibo_compra.html', {
-        'carrito': carrito,
-        'subtotal': subtotal,
-        'total': subtotal,
-        'fecha_venta': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-    })
+        logger.info("Context preparado exitosamente")
+        return render(request, 'recibo_compra.html', context)
+    
+    except Exception as e:
+        logger.error("Error en recibo_compra: %s", str(e), exc_info=True)
+        messages.error(request, f'Error al generar el recibo: {str(e)}')
+        return redirect('categorias')

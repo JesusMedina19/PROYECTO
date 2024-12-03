@@ -1,34 +1,192 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recibo de Compra</title>
     <link rel="stylesheet" href="{% static 'Inventario/recibo_compra.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alinea el contenido hacia la parte superior */
+            height: 100vh; /* Ocupa toda la altura de la pantalla */
+            margin: 0;
+            overflow: auto; /* Permite el desplazamiento si el contenido excede la altura */
+        }
+        
+        .metodo-pago {
+            width: 100%;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            box-sizing: border-box; /* Asegura que el padding no afecte el tamaño total */
+        }
+        
+        .metodo-pago h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        #pago-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        #pago-form label {
+            font-size: 16px;
+            color: #555;
+        }
+        
+        #metodo {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        #pago-form button {
+            background-color: #e83e8c; /* Rosado Bootstrap */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        #pago-form button:hover {
+            background-color: #d6336c; /* Un tono rosado más oscuro para el hover */
+        }
+        
+        #info-pago {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #444;
+        }
+        
+        #info-pago p {
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        /* Estilo para la sección del descuento */
+        .form-descuento {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 400px;
+            width: 100%;
+            margin: 20px auto; /* Asegura un buen espacio entre los elementos */
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            box-sizing: border-box; /* Asegura que el padding no afecte el tamaño total */
+        }
+        
+        .form-descuento label {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .form-descuento select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+            background-color: #fff;
+        }
+        
+        /* Botones */
+        .acciones {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .btn-volver {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-volver:hover {
+            background-color: #5a6268;
+            transform: scale(1.05);
+        }
+        
+        .btn-imprimir {
+            background-color: #e83e8c; /* Rosado Bootstrap */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-imprimir:hover {
+            background-color: #d6336c; /* Un tono rosado más oscuro para el hover */
+            transform: scale(1.05);
+        }
+        
+        /* Información del cliente y del pago */
+        .info-cliente, .info-pago {
+            display: block;
+            margin-top: 20px;
+        }
+        
+        .info-cliente p, .info-pago p {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+        
+        
+        
+    </style>
 </head>
 <body>
     <div class="factura">
         <header class="encabezado">
-            <!-- Logo más grande y centrado -->
             <div class="logo">
-                <img src="{% static 'img/logo.png' %}" alt="Logo Glam Femenina">
+                <img src="{% static 'image/logo.jpg' %}" alt="Logo Glam Femenina">
             </div>
-
-            <!-- Título y detalles -->
             <div class="titulo">
                 <h1>GLAM FEMENINA</h1>
-                <p>NÚMERO DE FACTURA {{ factura.numero }} | {{ fecha_venta }}</p>
+                <p>FECHA: {{ factura.id }} | {{ fecha_venta }} |</p>
                 <p>{{ direccion }}</p>
-                <p>WhatsApp: <a href="tel:+573232123845" style="color: #FF69B4; text-decoration: none;">323 2123845</a></p>
+                <p>WhatsApp: <a href="tel:+573232123845" style="color: #FF69B4; text-decoration: none;">323-212-3845</a></p>
             </div>
         </header>
 
-        <!-- Información del cliente -->
         <section id="seccion-cliente">
             <div id="formulario-cliente" class="formulario-contenedor">
                 <h2>Cliente:</h2>
-                <form id="cliente-form" class="formulario" method="POST">
+                <form id="cliente-form" class="formulario">
                     {% csrf_token %}
                     <div class="form-grupo">
                         <label for="nombre">Nombre</label>
@@ -46,63 +204,257 @@
                         <label for="direccion">Dirección</label>
                         <input type="text" id="direccion" name="direccion" placeholder="Dirección" required>
                     </div>
-                    <button type="submit" class="btn-guardar">Guardar Cliente</button>
+                    <button type="submit" class="btn-guardar">Continuar con la compra</button>
                 </form>
             </div>
-
-            <!-- Mostrar información del cliente -->
-            {% if cliente %}
-            <div id="info-cliente" class="info-cliente">
-                <h2>Cliente:</h2>
-                <p><strong>Nombre:</strong> {{ cliente.nombre }}</p>
-                <p><strong>Correo:</strong> {{ cliente.correo }}</p>
-                <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+            <div id="info-cliente" class="info-cliente" style="display: none;">
+                <h2>Datos del Cliente:</h2>
+                <p><strong>Nombre:</strong> <span id="cliente-nombre"></span></p>
+                <p><strong>Correo:</strong> <span id="cliente-correo"></span></p>
+                <p><strong>Teléfono:</strong> <span id="cliente-telefono"></span></p>
+                <p><strong>Dirección:</strong> <span id="cliente-direccion"></span></p>
             </div>
-            {% endif %}
         </section>
 
-        <!-- Tabla de productos -->
         <section class="tabla">
             <table>
                 <thead>
                     <tr>
-                        <th>Descripción</th>
+                        <th>Nombre</th>
                         <th>Cantidad</th>
                         <th>Precio</th>
-                        <th>Total</th>
+                        <th>Subtotal</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for producto in carrito %}
+                    {% for item in carrito %}
                     <tr>
-                        <td>{{ producto.descripcion }}</td>
-                        <td>{{ producto.cantidad }}</td>
-                        <td>${{ producto.precio }}</td>
-                        <td>${{ producto.precio|floatformat:2 }}</td>
+                        <td>{{ item.nombre }}</td>
+                        <td>{{ item.cantidad }}</td>
+                        <td>${{ item.precio|floatformat:2 }}</td>
+                        <td>${{ item.total|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-right"><strong>Total:</strong></td>
+                        <td id="total-final">${{ total|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
             </table>
-            <div class="totales">
-                <p>Subtotal: ${{ subtotal }}</p>
-                <p class="total" style="color: white;">TOTAL: ${{ total }}</p>
+        </section>
+
+        <section class="metodo-pago">
+            <h2>Método de Pago:</h2>
+            <form id="pago-form">
+                
+                <select id="metodo">
+                    <option value="Nequi">Nequi</option>
+                    <option value="DaviPlata">DaviPlata</option>
+                    <option value="Sistecredito">Sistecredito</option>
+                    <option value="Efectivo">Efectivo</option>
+                </select>
+                <button type="submit">Seleccionar</button>
+            </form>
+            <div id="info-pago" style="display: none;">
+                <p><strong>Método de Pago Seleccionado:</strong> <span id="metodo-seleccionado"></span></p>
             </div>
         </section>
 
-        <!-- Detalle del pago -->
-        <section id="detalle-pago" style="display: none; margin-top: 20px;">
-            <h3>Detalle del Pago:</h3>
-            <p>{{ metodo_pago }}</p>
+        <section class="form-descuento">
+            <label for="descuento">Aplicar Descuento:</label>
+            <select id="descuento">
+                <option value="0">0%</option>
+                <option value="5">5%</option>
+                <option value="10">10%</option>
+                <option value="15">15%</option>
+                <option value="20">20%</option>
+                <option value="25">25%</option>
+                <option value="30">30%</option>
+                <option value="35">35%</option>
+                <option value="40">40%</option>
+            </select>
         </section>
+        
 
-        <!-- Botón de acciones -->
         <div class="acciones">
             <button id="btn-imprimir" class="btn-imprimir">Imprimir Recibo</button>
+            <button id="btn-volver" class="btn-volver" onclick="window.location.href='{% url 'categorias' %}'">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+            
+
         </div>
     </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const btnImprimir = document.getElementById('btn-imprimir');
+    const formularioCliente = document.getElementById('cliente-form');
+    const infoCliente = document.getElementById('info-cliente');
+    const formularioPago = document.getElementById('pago-form');
+    const infoPago = document.getElementById('info-pago');
+    const metodoSeleccionado = document.getElementById('metodo-seleccionado');
+    const descuentoSelect = document.getElementById('descuento'); // Selección de descuento
+
+    // Deshabilitar el botón de imprimir inicialmente
+    btnImprimir.disabled = true;
+    btnImprimir.title = 'Complete los datos del cliente y método de pago para habilitar la impresión';
+    btnImprimir.classList.add('btn-disabled');
+
+    // Capturar datos del cliente
+    formularioCliente.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const clienteData = {
+            nombre: document.getElementById('nombre').value,
+            correo: document.getElementById('correo').value,
+            telefono: document.getElementById('telefono').value,
+            direccion: document.getElementById('direccion').value,
+        };
+
+        // Mostrar los datos del cliente
+        document.getElementById('cliente-nombre').textContent = clienteData.nombre;
+        document.getElementById('cliente-correo').textContent = clienteData.correo;
+        document.getElementById('cliente-telefono').textContent = clienteData.telefono;
+        document.getElementById('cliente-direccion').textContent = clienteData.direccion;
+
+        // Ocultar formulario y mostrar información
+        formularioCliente.parentElement.style.display = 'none';
+        infoCliente.style.display = 'block';
+
+        validarImpresion();
+    });
+
+    // Capturar datos del pago y mostrar el método seleccionado
+    formularioPago.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const metodo = document.getElementById('metodo').value;
+
+        // Actualizar el método de pago visible
+        metodoSeleccionado.textContent = metodo.charAt(0).toUpperCase() + metodo.slice(1);
+
+        // Mostrar la información del método de pago
+        infoPago.style.display = 'block';
+
+        // Guardar el método de pago en sessionStorage
+        sessionStorage.setItem('metodoPago', metodo);
+
+        validarImpresion();
+    });
+
+    // Función para validar si los datos son completos para habilitar la impresión
+    function validarImpresion() {
+        if (infoCliente.style.display !== 'none' && infoPago.style.display !== 'none') {
+            btnImprimir.disabled = false;
+            btnImprimir.classList.remove('btn-disabled');
+        }
+    }
+
+    // Generar el PDF al hacer clic en el botón de imprimir
+    btnImprimir.addEventListener('click', function () {
+        const clienteData = {
+            nombre: document.getElementById('cliente-nombre').textContent,
+            correo: document.getElementById('cliente-correo').textContent,
+            telefono: document.getElementById('cliente-telefono').textContent,
+            direccion: document.getElementById('cliente-direccion').textContent,
+        };
+
+        const carritoData = [...document.querySelectorAll('table tbody tr')].map((row) => {
+            const cells = row.querySelectorAll('td');
+            return {
+                nombre: cells[0].textContent,
+                cantidad: cells[1].textContent,
+                precio: cells[2].textContent,
+                subtotal: cells[3].textContent,
+            };
+        });
+
+        const total = document.querySelector('tfoot td:last-child').textContent;
+        const metodoPago = sessionStorage.getItem('metodoPago');
+
+        // Capturar el descuento seleccionado
+        const descuento = descuentoSelect.value;
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', [76, 355]); // Usar tamaño de papel térmico 3x14 pulgadas (76 mm x 355 mm)
+
+        doc.setFontSize(10); // Reducir el tamaño de la fuente
+
+        // Encabezado del PDF centrado
+        doc.setFont('courier', 'bold');
+        doc.text('GLAM FEMENINA', 38, 10, null, null, 'center');
+        doc.setFont('courier', 'normal');
+        doc.text('Cra4 #70-22 conjunto \n Valparaíso local 44', 38, 18, null, null, 'center');
+        doc.text('\n WhatsApp 323 2123845', 38, 24, null, null, 'center');
+        doc.text(`\n Fecha: ${new Date().toLocaleString()}`, 38, 30, null, null, 'center');
+
+        // Línea de separación
+        doc.line(5, 35, 71, 35);
+
+        // Información del cliente
+        let yPosition = 40;
+        doc.text('Cliente:', 5, yPosition);
+        yPosition += 5;
+        doc.text(`Nombre: ${clienteData.nombre}`, 5, yPosition);
+        yPosition += 5;
+        doc.text(`Correo: ${clienteData.correo}`, 5, yPosition);
+        yPosition += 5;
+        doc.text(`Teléfono: ${clienteData.telefono}`, 5, yPosition);
+        yPosition += 5;
+        doc.text(`Dirección: ${clienteData.direccion}`, 5, yPosition);
+        yPosition += 10;
+
+        // Crear la tabla de productos
+        doc.autoTable({
+    startY: yPosition,
+    head: [['Producto', 'Cantidad', 'Precio', 'Subtotal']],
+    body: carritoData.map(item => [item.nombre, item.cantidad, item.precio, item.subtotal]),
+    theme: 'grid',
+    styles: {
+        fontSize: 8, // Hacer las letras más pequeñas
+        minCellHeight: 8, // Aumentar ligeramente la altura de las celdas
+    },
+    columnStyles: {
+        0: { columnWidth: 17 }, // Ajustar el ancho de la columna de productos
+        1: { columnWidth: 17 }, // Ajustar el ancho de la columna de cantidad
+        2: { columnWidth: 15 }, // Ajustar el ancho de la columna de precio
+        3: { columnWidth: 15 }, // Ajustar el ancho de la columna de subtotal
+    },
+    // Añadir el margen para centrar la tabla
+    margin: { left: (doc.internal.pageSize.width - 64) / 2 } // 64 es el ancho total calculado de la tabla
+});
+
+
+        yPosition = doc.lastAutoTable.finalY + 5;
+
+        // Descuento
+        if (descuento > 0) {
+            doc.text(`Descuento: ${descuento}%`, 5, yPosition);
+            yPosition += 5;
+        }
+
+        // Total y método de pago
+        doc.text(`Total: ${total}`, 5, yPosition);
+        yPosition += 5;
+        doc.text(`Método: ${metodoPago}`, 5, yPosition);
+
+        doc.save('recibo_compra.pdf');
+    });
+});
+
+
+
+
+
+        
+    </script>
 
     <script src="{% static 'Inventario/recibo_compra.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </body>
+
 </html>

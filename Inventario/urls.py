@@ -5,10 +5,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', views.login_view, name='login'),
+    path('', views.login_view,name='login'),
+    path('categorias/', views.categorias_view, name='categorias'),  # Cambiado para usar categorias como página inicial
     path('register/', views.register_view, name='register'),
-    path('menu/',views.menu_view,name="menu"),
     path('categorias/', views.categorias_view, name='categorias'),
     path('categorias/crear/', views.crear_categoria, name='crear_categoria'),
     path('categorias/modificar/<int:id_categoria>/', views.modificar_categoria, name='modificar_categoria'),
@@ -20,6 +19,6 @@ urlpatterns = [
     path('agregar_al_carrito/<str:nombre>/<str:precio>/', views.agregar_al_carrito, name='agregar_al_carrito'),
     path('mostrar_carrito/', views.mostrar_carrito, name='mostrar_carrito'),
     path('recibo_compra/', views.recibo_compra, name='recibo_compra'),
-
+    path('actualizar_carrito/', views.actualizar_carrito, name='actualizar_carrito'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -10,32 +10,24 @@ class UsuarioManager(BaseUserManager):
     Gestor de usuarios personalizado para crear usuarios y superusuarios.
     """
 
-    def create_user(self, usuario, contrasena=None, **extra_fields):
-        """
-        Crea y guarda un usuario regular con nombre de usuario y contraseña.
-        """
-        # Verifica que se proporcione el nombre de usuario
+    def create_user(self, usuario, password=None, **extra_fields):
         if not usuario:
-            raise ValueError('El nombre de usuario debe ser proporcionado')
+            raise ValueError('El usuario es obligatorio')
         
-        # Crea el usuario con los datos proporcionados
-        usuario = self.model(usuario=usuario, **extra_fields)
-        # Encripta la contraseña y la asigna al usuario
-        usuario.set_password(contrasena)
-        # Guarda el usuario en la base de datos
-        usuario.save(using=self._db)
-        return usuario
+        user = self.model(
+            usuario=usuario,
+            **extra_fields
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
-    def create_superuser(self, usuario, contrasena=None, **extra_fields):
-        """
-        Crea y guarda un superusuario con nombre de usuario y contraseña.
-        """
-        # Define que este usuario es parte del personal y tiene permisos de superusuario
+    def create_superuser(self, usuario, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-
-        # Crea el superusuario con los datos proporcionados
-        return self.create_user(usuario, contrasena, **extra_fields)
+        extra_fields.setdefault('is_active', True)
+        
+        return self.create_user(usuario, password, **extra_fields)
 
 
 # Clase que define el modelo personalizado de Usuario
@@ -53,8 +45,10 @@ class Usuario(AbstractBaseUser):
     usuario = models.CharField(max_length=50, unique=True)
     # Indica si el usuario es parte del personal
     is_staff = models.BooleanField(default=False)
-    # Indica si el usuario tiene permisos de superusuario
+    # Corregir el paréntesis y usar default directamente
     is_superuser = models.BooleanField(default=False)
+    # Indica si el usuario está activo
+    is_active = models.BooleanField(default=True)
 
     # Asigna el gestor personalizado
     objects = UsuarioManager()
@@ -69,6 +63,20 @@ class Usuario(AbstractBaseUser):
         Representación en cadena del objeto Usuario.
         """
         return f'{self.nombre} ({self.usuario})'
+
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
+
+    def clean(self):
+        super().clean()
+        return self.usuario
+
+    @property
+    def username(self):
+        return self.usuario
 
 
 # Clase que define el modelo de Cliente
@@ -137,40 +145,40 @@ class Producto(models.Model):
         Representación en cadena del objeto Producto con su categoría.
         """
         return f"{self.nombre} - {self.categoria.nombre}"
+    
+    def save(self, *args, **kwargs):
+        self.disponible = self.stock > 0
+        super().save(*args, **kwargs)
 
+    @property
+    def esta_disponible(self):
+        return self.stock > 0 and self.disponible
 
-# Clase que define el modelo de Venta
-class Venta(models.Model):
-    """
-    Modelo que define las ventas realizadas en el sistema.
-    """
-    # Clave primaria autoincremental para la venta
-    id_venta = models.AutoField(primary_key=True)
-    # Relación con el usuario que realizó la venta
-    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    # Relación con el cliente al que se realizó la venta
-    id_cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    # Relación muchos a muchos con los productos vendidos
-    id_producto = models.ManyToManyField(Producto)
-    # Fecha en que se realizó la venta
-    fecha = models.DateField()
-    # Total de la venta (opcional), calculado con el método `calcular_total`
-    total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    def calcular_total(self):
-        """
-        Calcula el total de la venta sumando los precios de todos los productos en la venta.
-        """
-        # Calcula la suma de los precios de todos los productos en la venta
-        total = sum(producto.precio for producto in self.id_producto.all())
-        # Asigna el total calculado al campo 'total'
-        self.total = total
-        # Guarda los cambios en la base de datos
-        self.save()
-        return total
+    def get_precio_formateado(self):
+        return "{:.2f}".format(float(self.precio))
+    
+    def get_precio_input(self):
+        """Formato específico para inputs type="number" """
+        return f"{float(self.precio):.2f}"
 
     def __str__(self):
-        """
-        Representación en cadena del objeto Venta con fecha y total.
-        """
-        return f"Fecha: {self.fecha}, Total: {self.total}"
+        return f"{self.nombre} - {self.categoria.nombre} (Stock: {self.stock})"
+
+
+class Venta(models.Model):
+    id_venta = models.AutoField(primary_key=True)
+    id_usuario = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    id_cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE)
+    id_producto = models.ManyToManyField('Producto')
+    fecha = models.DateTimeField(auto_now_add=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return f"Venta {self.id_venta} - {self.id_cliente.nombre}"
+    
+    def calcular_total(self):
+        total = 0
+        for producto in self.id_producto.all():
+            total += producto.precio  # Asegúrate de que el modelo Producto tenga el campo `precio`
+        self.total = total
+        self.save()
